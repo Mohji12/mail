@@ -1,25 +1,27 @@
 import io
 import os
 import uuid
-from pathlib import Path
 from typing import Optional
 
 import cloudinary
 import cloudinary.uploader
-from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).parent / ".env")
+from app.env_loader import load_app_env, require_env
 
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    secure=True,
-)
+
+def _configure_cloudinary() -> None:
+    load_app_env()
+    cloudinary.config(
+        cloud_name=require_env("CLOUDINARY_CLOUD_NAME"),
+        api_key=require_env("CLOUDINARY_API_KEY"),
+        api_secret=require_env("CLOUDINARY_API_SECRET"),
+        secure=True,
+    )
 
 
 def upload_banner(data: bytes, filename: str, kind: str) -> str:
     """Upload banner image or PDF; returns HTTPS URL for use in emails."""
+    _configure_cloudinary()
     ext = os.path.splitext(filename)[1].lower().lstrip(".")
     resource_type = "raw" if kind == "pdf" else "image"
     options = {
@@ -36,8 +38,9 @@ def upload_banner(data: bytes, filename: str, kind: str) -> str:
 
 def upload_recipient_list(data: bytes, original_filename: str) -> Optional[str]:
     """Store CSV/Excel privately on Cloudinary. Returns public_id or None."""
-    safe_base = os.path.basename(original_filename or "recipients.csv").replace("\\", "_").replace("/", "_")
     try:
+        _configure_cloudinary()
+        safe_base = os.path.basename(original_filename or "recipients.csv").replace("\\", "_").replace("/", "_")
         result = cloudinary.uploader.upload(
             io.BytesIO(data),
             folder="recipient-lists",

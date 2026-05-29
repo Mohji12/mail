@@ -7,6 +7,10 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from app.env_loader import load_app_env
+
+load_app_env()
+
 from typing import List, Optional
 from fastapi import FastAPI, UploadFile, Form, File
 from fastapi.responses import JSONResponse
@@ -23,7 +27,21 @@ app = FastAPI()
 # Initialize analytics database on startup
 @app.on_event("startup")
 def startup_event():
-    init_db()
+    missing = [
+        name
+        for name in ("CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET")
+        if not os.getenv(name)
+    ]
+    if missing:
+        print(
+            "WARNING: Cloudinary env vars not set: "
+            + ", ".join(missing)
+            + ". Add them to app/.env locally or to your host environment (production)."
+        )
+    try:
+        init_db()
+    except Exception as e:
+        print(f"WARNING: Analytics DB init failed (emails may still send): {e}")
 
 # Enable CORS (customize for production)
 app.add_middleware(
