@@ -1,0 +1,16 @@
+# Keep Lambda image context small and avoid junk layers
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+mail
+frontend
+website
+node_modules
+*.md
+.env
+.env.*
+terminals
+.vscode
+.idea

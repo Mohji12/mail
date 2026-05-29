@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Local virtualenv (do not commit)
+mail/
+venv/
+.venv/
+env/
+
+# Secrets & local config
+.env
+.env.*
+!.env.example
+
+# Node / frontend build
+node_modules/
+website/dist/
+dist/
+
+# Runtime / uploads
+uploads/
+*.db
+analytics.db
+
+# Archives & local artifacts
+app.zip
+*.zip
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
