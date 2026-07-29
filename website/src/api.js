@@ -1,6 +1,6 @@
 /** API base URL. Override with VITE_API_BASE_URL in .env (see .env.example). */
 export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001';
+  import.meta.env.VITE_API_BASE_URL || 'https://diazstudios.site';
 
 export async function sendEmails(formData) {
   try {
@@ -10,6 +10,11 @@ export async function sendEmails(formData) {
     });
 
     if (!response.ok) {
+      if (response.status === 413) {
+        throw new Error(
+          'Upload too large: reduce banner image sizes or ask the server admin to increase nginx client_max_body_size.'
+        );
+      }
       let errorMessage = `Server error: ${response.status} ${response.statusText}`;
       try {
         const errorData = await response.json();
@@ -25,7 +30,7 @@ export async function sendEmails(formData) {
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       throw new Error(
-        'Network error: Unable to connect to the server. Please make sure the backend is running.'
+        'Upload failed (often file too large — nginx returns 413 without CORS). Use smaller banners or increase server client_max_body_size.'
       );
     }
     throw error;

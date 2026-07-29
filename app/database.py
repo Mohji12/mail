@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 # MySQL connection details
-DB_HOST = "3.7.74.62"
+DB_HOST = "13.200.205.130"
 DB_PORT = 3306
 DB_USER = "admin"
 DB_PASSWORD = "HarishCC@2026SecureDB"

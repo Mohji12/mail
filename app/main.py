@@ -7,7 +7,7 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from app.env_loader import load_app_env
+from app.env_loader import load_app_env, cors_origins
 
 load_app_env()
 
@@ -43,12 +43,13 @@ def startup_event():
     except Exception as e:
         print(f"WARNING: Analytics DB init failed (emails may still send): {e}")
 
-# Enable CORS (customize for production)
+# CORS: allow_credentials=True cannot be used with allow_origins=["*"] (browser blocks it).
+_origins = cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to your React frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -157,7 +158,7 @@ async def send_emails(
     # Step 6: Send emails
     successful_count = 0
     failed_count = 0
-    
+
     for email in emails:
         try:
             send_email(email, subject, content, banner_items)
