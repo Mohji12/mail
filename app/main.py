@@ -21,6 +21,7 @@ from io import StringIO, BytesIO  # Correct imports for StringIO and BytesIO
 from mangum import Mangum  # Add Mangum to handle the Lambda integration
 from app.database import init_db, log_campaign, get_analytics_summary
 from app.cloudinary_storage import upload_banner, upload_recipient_list
+from app.email_filter import filter_emails
 
 app = FastAPI()
 
@@ -72,6 +73,7 @@ async def send_emails(
     content: str = Form(...),
     banners: List[UploadFile] = File(...),
     csv_file: UploadFile = File(...),
+    filter_similar: str = Form("true"),
 ):
     if not banners:
         return JSONResponse(
@@ -155,6 +157,23 @@ async def send_emails(
 
     emails = data[email_column].dropna().astype(str).tolist()
 
+    # Step 5b: Filter invalid, duplicate, and similar (prefix/suffix) emails
+    do_filter = str(filter_similar).strip().lower() in ("1", "true", "yes", "on")
+    filtered = filter_emails(emails, filter_similar=do_filter)
+    emails = filtered.valid
+
+    if not emails:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "No valid emails left after filtering.",
+                "skipped_invalid": filtered.skipped_invalid[:50],
+                "skipped_duplicate": filtered.skipped_duplicate[:50],
+                "skipped_similar": filtered.skipped_similar[:50],
+                "skipped_suspicious": filtered.skipped_suspicious[:50],
+            },
+        )
+
     # Step 6: Send emails
     successful_count = 0
     failed_count = 0
@@ -174,7 +193,17 @@ async def send_emails(
         print(f"Failed to log campaign analytics: {e}")
 
     out = {
-        "message": f"Emails sent! Successful: {successful_count}, Failed: {failed_count}",
+        "message": (
+            f"Emails sent! Successful: {successful_count}, Failed: {failed_count}"
+            + (f", Filtered out: {filtered.skipped_count}" if filtered.skipped_count else "")
+        ),
+        "successful": successful_count,
+        "failed": failed_count,
+        "filtered_out": filtered.skipped_count,
+        "skipped_invalid": filtered.skipped_invalid[:50],
+        "skipped_duplicate": filtered.skipped_duplicate[:50],
+        "skipped_similar": filtered.skipped_similar[:50],
+        "skipped_suspicious": filtered.skipped_suspicious[:50],
     }
     if recipient_cloudinary_id:
         out["recipient_file_cloudinary_public_id"] = recipient_cloudinary_id

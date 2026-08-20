@@ -63,6 +63,22 @@
   line-height: 1.45;
 }
 
+.checkbox-row {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.checkbox-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #1e3a8a;
+  cursor: pointer;
+}
+
 .label-like {
   font-size: 1.05rem;
   color: #334155;

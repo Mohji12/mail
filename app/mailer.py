@@ -4,18 +4,23 @@ import base64
 import os
 import re
 
+from app.env_loader import load_app_env
+
+load_app_env()
+
+
 def send_email(to_email: str, subject: str, body: str, banner_items: list):
     """
     Sends email using ZeptoMail REST API.
-    This is more reliable than SMTP in cloud environments like Railway or AWS Lambda.
+    Uses the same API key as SMTP (SMTP_PASSWORD / ZEPTO_TOKEN in .env).
     """
-    # ZeptoMail API Configuration
-    # We use the same token as provided for SMTP
-    ZEPTO_TOKEN = "PHtE6r0NQr/tgjUv+0RS5qC6QpalMo4uqe1jeFVCsI5FWPYCGk1Sqd4ukmfhr00jXPURHKHKwN9v4OmZserXdDy5YWxOD2qyqK3sx/VYSPOZsbq6x00Zsl4afkLeUYHvcdZo1ifSvdvdNA=="
-    SENDER_EMAIL = os.getenv("SENDER_EMAIL", "support@harishcriticalcareclasses.com")
-    SENDER_NAME = os.getenv("SENDER_NAME", "Harish Critical Care Classes")
-    # Endpoint for .in region
-    API_URL = "https://api.zeptomail.in/v1.1/email"
+    zepto_token = os.getenv("ZEPTO_TOKEN") or os.getenv("SMTP_PASSWORD")
+    if not zepto_token:
+        raise Exception("ZeptoMail token missing. Set SMTP_PASSWORD or ZEPTO_TOKEN in app/.env")
+
+    sender_email = os.getenv("SENDER_EMAIL", "support@harishcriticalcareclasses.com")
+    sender_name = os.getenv("SENDER_NAME", "Harish Critical Care Classes")
+    api_url = os.getenv("ZEPTO_API_URL", "https://api.zeptomail.in/v1.1/email")
 
     # Step 1: Format the body (convert newlines to <br> and URLs to buttons)
     formatted_body = body.replace("\n", "<br>")
@@ -74,8 +79,8 @@ def send_email(to_email: str, subject: str, body: str, banner_items: list):
     # Step 4: Prepare API Payload
     payload = {
         "from": {
-            "address": SENDER_EMAIL,
-            "name": SENDER_NAME
+            "address": sender_email,
+            "name": sender_name
         },
         "to": [
             {
@@ -95,11 +100,11 @@ def send_email(to_email: str, subject: str, body: str, banner_items: list):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "authorization": f"Zoho-enczapikey {ZEPTO_TOKEN}"
+        "authorization": f"Zoho-enczapikey {zepto_token}"
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+        response = requests.post(api_url, headers=headers, data=json.dumps(payload))
         
         if response.status_code != 200 and response.status_code != 201:
             error_data = response.json()
@@ -107,7 +112,7 @@ def send_email(to_email: str, subject: str, body: str, banner_items: list):
             
             # Handle specific error cases for better feedback
             if "verified" in error_msg.lower():
-                raise Exception(f"Sender refused: {SENDER_EMAIL} is not verified in ZeptoMail. Error: {error_msg}")
+                raise Exception(f"Sender refused: {sender_email} is not verified in ZeptoMail. Error: {error_msg}")
             elif "authorization" in error_msg.lower():
                 raise Exception(f"API authentication failed. Please check your token. Error: {error_msg}")
             else:

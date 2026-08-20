@@ -23,6 +23,7 @@ const EmailForm = () => {
   const [mode, setMode] = useState('file');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [filterSimilar, setFilterSimilar] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +36,7 @@ const EmailForm = () => {
     const formData = new FormData();
     formData.append('subject', subject);
     formData.append('content', content);
+    formData.append('filter_similar', filterSimilar ? 'true' : 'false');
     bannerFiles.forEach((file) => {
       formData.append('banners', file);
     });
@@ -49,7 +51,16 @@ const EmailForm = () => {
     try {
       const response = await sendEmails(formData);
       const data = await response.json();
-      setMessage(data.message || 'Emails sent successfully!');
+      let msg = data.message || 'Emails sent successfully!';
+      if (data.filtered_out > 0) {
+        const bits = [];
+        if (data.skipped_invalid?.length) bits.push(`${data.skipped_invalid.length} invalid`);
+        if (data.skipped_duplicate?.length) bits.push(`${data.skipped_duplicate.length} duplicate`);
+        if (data.skipped_similar?.length) bits.push(`${data.skipped_similar.length} similar`);
+        if (data.skipped_suspicious?.length) bits.push(`${data.skipped_suspicious.length} suspicious`);
+        if (bits.length) msg += ` (${bits.join(', ')})`;
+      }
+      setMessage(msg);
     } catch (err) {
       setMessage(err.message || 'Error sending emails. Please try again.');
       console.error('Error sending emails:', err);
@@ -145,6 +156,21 @@ const EmailForm = () => {
             />
           </div>
         )}
+        <div>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={filterSimilar}
+              onChange={(e) => setFilterSimilar(e.target.checked)}
+            />
+            Filter similar &amp; duplicate emails before sending
+          </label>
+          <p className="field-hint">
+            Skips invalid addresses, exact duplicates, fake patterns like{' '}
+            <code>23mohangola89@gmail.com</code>, and near-matches like{' '}
+            <code>1mohangola47@gmail.com</code> when <code>mohangola47@gmail.com</code> is present.
+          </p>
+        </div>
         <button type="submit" disabled={loading}>
           {loading ? 'Sending...' : 'Send Emails'}
         </button>

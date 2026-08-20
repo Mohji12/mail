@@ -32,6 +32,7 @@ def cors_origins() -> list[str]:
         "https://staging.d5w312h4wy6nw.amplifyapp.com",
         "https://d5w312h4wy6nw.amplifyapp.com",
         "https://diazstudios.site",
+        "https://cedat.menteetracker.com",
     ]
     extra = os.getenv("CORS_ORIGINS", "").strip()
     if extra == "*":

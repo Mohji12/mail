@@ -1,6 +1,6 @@
 /** API base URL. Override with VITE_API_BASE_URL in .env (see .env.example). */
 export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://diazstudios.site';
+  import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001';
 
 export async function sendEmails(formData) {
   try {
