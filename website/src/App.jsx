@@ -23,7 +23,7 @@ function App() {
             className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
-            Analytics Data
+            Admin Daily Report
           </button>
         </div>
       </nav>
