@@ -38,6 +38,7 @@ def cors_origins() -> list[str]:
         "https://mail.harishcriticalcareclasses.com",
         "https://www.harishcriticalcareclasses.com",
         "https://harishcriticalcareclasses.com",
+        "https://mail-iota-lilac.vercel.app",
     ]
     extra = os.getenv("CORS_ORIGINS", "").strip()
     if extra == "*":
