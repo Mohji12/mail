@@ -1,11 +1,20 @@
 .form-bg-wrapper {
   position: relative;
-  padding: 60px 0;
+  padding: 24px 12px 100px;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   background: linear-gradient(135deg, #e9f0f7 0%, #c4d7e9 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .form-bg-wrapper {
+    padding: 60px 20px 100px;
+    align-items: center;
+  }
 }
 
 .email-form {

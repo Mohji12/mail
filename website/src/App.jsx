@@ -35,12 +35,12 @@ function App() {
       <footer className="footer-powered">
         Powered By{' '}
         <a
-          href="https://www.krintix.com/"
+          href="https://www.biogred.com/"
           target="_blank"
           rel="noopener noreferrer"
           className="footer-link"
         >
-          krintix.com
+          biogred.com
         </a>
       </footer>
     </>

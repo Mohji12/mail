@@ -1,6 +1,7 @@
 .analytics-container {
+  width: 100%;
   max-width: 900px;
-  margin: 0 auto 100px auto;
+  margin: 0 auto;
   padding: 40px;
   background: #ffffff;
   border-radius: 16px;
@@ -329,17 +330,81 @@
 
 @media (max-width: 768px) {
   .analytics-container {
-    padding: 24px;
-    margin: 20px 16px 100px 16px;
+    padding: 20px 16px 24px;
+    margin: 0;
+    border-radius: 12px;
+  }
+
+  .analytics-header h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+
+  .report-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions .refresh-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stats-grid.compact .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
   }
 
   .analytics-header {
     flex-direction: column;
     gap: 16px;
+    align-items: stretch;
+  }
+
+  .section-heading {
+    flex-direction: column;
     align-items: flex-start;
+  }
+
+  .view-tabs {
+    width: 100%;
+  }
+
+  .view-tabs button {
+    flex: 1;
+  }
+
+  .campaigns-table th,
+  .campaigns-table td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+
+  .subject-cell {
+    max-width: 120px;
+  }
+
+  .analytics-loading,
+  .analytics-error {
+    margin: 24px 0;
+    padding: 32px 20px;
   }
 }
