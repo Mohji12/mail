@@ -22,6 +22,10 @@ def require_env(name: str) -> str:
     return value.strip()
 
 
+def _normalize_origin(url: str) -> str:
+    return (url or "").strip().rstrip("/")
+
+
 def cors_origins() -> list[str]:
     """Allowed browser origins. CORS_ORIGINS env can add comma-separated URLs or *."""
     defaults = [
@@ -29,6 +33,8 @@ def cors_origins() -> list[str]:
         "http://localhost:5173",
         "http://127.0.0.1:8001",
         "http://localhost:8001",
+        # Vercel frontend — https://mail-iota-lilac.vercel.app/
+        "https://mail-iota-lilac.vercel.app",
         "https://staging.d5w312h4wy6nw.amplifyapp.com",
         "https://d5w312h4wy6nw.amplifyapp.com",
         "https://staging.d1daw2yg43xlwa.amplifyapp.com",
@@ -38,13 +44,15 @@ def cors_origins() -> list[str]:
         "https://mail.harishcriticalcareclasses.com",
         "https://www.harishcriticalcareclasses.com",
         "https://harishcriticalcareclasses.com",
-        "https://mail-iota-lilac.vercel.app",
     ]
+    defaults = [_normalize_origin(o) for o in defaults]
     extra = os.getenv("CORS_ORIGINS", "").strip()
     if extra == "*":
         return ["*"]
     if extra:
-        merged = defaults + [o.strip() for o in extra.split(",") if o.strip()]
+        merged = defaults + [
+            _normalize_origin(o) for o in extra.split(",") if o.strip()
+        ]
         return list(dict.fromkeys(merged))
     return defaults
 
