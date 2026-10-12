@@ -7,7 +7,7 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from app.env_loader import load_app_env, cors_origins
+from app.env_loader import load_app_env, cors_origins, cors_allow_all, cors_origin_regex
 
 load_app_env()
 
@@ -43,15 +43,22 @@ def startup_event():
         init_db()
     except Exception as e:
         print(f"WARNING: Analytics DB init failed (emails may still send): {e}")
+    print(
+        f"CORS: allow_all={cors_allow_all()}, origins={len(_origins)}, "
+        f"regex={_origin_regex!r}"
+    )
 
-# CORS: allow_credentials=True cannot be used with allow_origins=["*"] (browser blocks it).
-_origins = cors_origins()
+# CORS (credentials must stay false if allow_origins is "*")
+_origins = ["*"] if cors_allow_all() else cors_origins()
+_origin_regex = None if cors_allow_all() else cors_origin_regex()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
+    allow_origin_regex=_origin_regex,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 @app.get("/")

@@ -47,3 +47,20 @@ def cors_origins() -> list[str]:
         merged = defaults + [o.strip() for o in extra.split(",") if o.strip()]
         return list(dict.fromkeys(merged))
     return defaults
+
+
+def cors_allow_all() -> bool:
+    return os.getenv("CORS_ALLOW_ALL", "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def cors_origin_regex() -> str | None:
+    """
+    Regex for extra allowed origins (e.g. all Vercel preview URLs).
+    Set CORS_ORIGIN_REGEX=... to override; set CORS_VERCEL=false to disable Vercel pattern.
+    """
+    custom = os.getenv("CORS_ORIGIN_REGEX", "").strip()
+    if custom:
+        return custom
+    if os.getenv("CORS_VERCEL", "true").strip().lower() in ("0", "false", "no", "off"):
+        return None
+    return r"https://[a-z0-9][a-z0-9-]*\.vercel\.app"
